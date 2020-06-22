@@ -5,6 +5,7 @@ var ProjectInput = (function () {
         this.hostElement = document.getElementById("app");
         var importedNode = document.importNode(this.templateElement.content, true);
         this.element = importedNode.firstElementChild;
+        this.element.id = "user-input";
         this.attach();
     }
     ProjectInput.prototype.attach = function () {
