@@ -6,6 +6,9 @@ var ProjectInput = (function () {
         var importedNode = document.importNode(this.templateElement.content, true);
         this.element = importedNode.firstElementChild;
         this.element.id = "user-input";
+        this.titleInputElement = this.element.querySelector("#title");
+        this.descriptionInputElement = this.element.querySelector("#description");
+        this.peopleInputElement = this.element.querySelector("#people");
         this.attach();
     }
     ProjectInput.prototype.attach = function () {
