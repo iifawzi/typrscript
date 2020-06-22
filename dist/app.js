@@ -32,9 +32,33 @@ var ProjectInput = (function () {
     ProjectInput.prototype.attach = function () {
         this.hostElement.insertAdjacentElement('afterbegin', this.element);
     };
+    ProjectInput.prototype.clearInputs = function () {
+        this.titleInputElement.value = "";
+        this.descriptionInputElement.value = "";
+        this.peopleInputElement.value = "";
+    };
     ProjectInput.prototype.submitHandler = function (event) {
         event.preventDefault();
-        console.log(this.titleInputElement.value);
+        var userinput = this.gatherUserInput();
+        if (Array.isArray(userinput)) {
+            var title = userinput[0], desc = userinput[1], people = userinput[2];
+            console.log(title, desc, people);
+            this.clearInputs();
+        }
+        else {
+        }
+    };
+    ProjectInput.prototype.gatherUserInput = function () {
+        var enteredTitle = this.titleInputElement.value;
+        var enteredDescription = this.descriptionInputElement.value;
+        var enteredPeople = this.peopleInputElement.value;
+        if (enteredTitle.trim().length === 0 || enteredDescription.trim().length === 0 || enteredPeople.trim().length === 0) {
+            alert("Invalid input, please try again");
+            return;
+        }
+        else {
+            return [enteredTitle, enteredDescription, +enteredPeople];
+        }
     };
     ProjectInput.prototype.configure = function () {
         this.element.addEventListener('submit', this.submitHandler);
