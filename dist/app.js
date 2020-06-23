@@ -90,8 +90,14 @@ var ProjectList = (function () {
         this.element = importedNode.firstElementChild;
         this.element.id = this.type + "-projects";
         projectState.addListener(function (projects) {
+            var releventProjects = projects.filter(function (prj) {
+                if (_this.type === 'active') {
+                    return prj.status === projectStatus.Active;
+                }
+                return prj.status === projectStatus.Finished;
+            });
             console.log(_this);
-            _this.assignedProjects = projects;
+            _this.assignedProjects = releventProjects;
             _this.renderProjects();
         });
         this.attach();
@@ -99,6 +105,7 @@ var ProjectList = (function () {
     }
     ProjectList.prototype.renderProjects = function () {
         var listEl = document.getElementById(this.type + "-project-list");
+        listEl.innerHTML = '';
         for (var _i = 0, _a = this.assignedProjects; _i < _a.length; _i++) {
             var prjItem = _a[_i];
             var listItem = document.createElement("li");

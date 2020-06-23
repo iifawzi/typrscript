@@ -98,8 +98,15 @@ class ProjectList {
         this.element.id = `${this.type}-projects`
 
         projectState.addListener((projects: Project[])=> {
+            const releventProjects = projects.filter(prj=> {
+                if (this.type === 'active'){
+                   return prj.status === projectStatus.Active
+                }
+                return prj.status === projectStatus.Finished
+
+             })
             console.log(this);
-            this.assignedProjects = projects;
+            this.assignedProjects = releventProjects;
             this.renderProjects();
         });
 
@@ -109,6 +116,7 @@ class ProjectList {
 
     private renderProjects(){
         const listEl = <HTMLUListElement>document.getElementById(`${this.type}-project-list`)!;
+        listEl.innerHTML = '';
         for (const prjItem of this.assignedProjects){
             const listItem = document.createElement("li");
             listItem.textContent = prjItem.title;
