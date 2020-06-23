@@ -1,3 +1,19 @@
+// Drag and Drop Interfaces
+
+interface Dragable {
+    dragStartHandler(event: DragEvent): void;
+    dragEndHandler(event: DragEvent): void;
+}
+
+interface DragTarget {
+    dragOverHandler(event: DragEvent): void;
+    dropHandler(event: DragEvent): void;
+    dragLeaveHandler(event: DragEvent): void;
+}
+
+
+
+
 //Project Type: 
 enum projectStatus {Active, Finished};
 
@@ -25,9 +41,7 @@ class ProjectState extends state<Project> {
     public addProject(title: string, description: string,numOfPeople:number){
         const newProject = new Project(Math.random().toString(), title,description,numOfPeople,projectStatus.Active)
         this.projects.push(newProject);
-        for (const listenerFn of this.listeners){
-            listenerFn(this.projects.slice());
-        }
+        this.updateListeners();
     };
 
     static getInstance(){
@@ -38,6 +52,19 @@ class ProjectState extends state<Project> {
         return this.instance;
     }
 
+    public moveProject(projectId: string, newStatus: projectStatus){
+      const project =   this.projects.find(prj=> prj.id === projectId);
+      if(project && project.status !== newStatus){
+        project.status = newStatus;
+      }
+      this.updateListeners();
+    }
+
+    private updateListeners(){
+        for (const listenerFn of this.listeners){
+            listenerFn(this.projects.slice());
+        }
+    }
 
 }
 const projectState = ProjectState.getInstance();
@@ -118,7 +145,7 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 
 // ProjectList Class: 
 
-class ProjectList extends Component<HTMLDivElement, HTMLElement>{
+class ProjectList extends Component<HTMLDivElement, HTMLElement>  implements DragTarget{
     assignedProjects: Project[];
     constructor(private type: 'active' | 'finished'){
         super('project-list', 'app', false , `${type}-projects`);
@@ -128,7 +155,31 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement>{
         this.renderContent();
     }
 
+    @autobind
+    dragOverHandler(event: DragEvent){
+        if (event.dataTransfer && event.dataTransfer.types[0] === 'text/plain'){
+            event.preventDefault();
+            const listEl = this.element.querySelector('ul')!;
+            listEl.classList.add('droppable');
+        }
+    };
+
+    @autobind
+    dropHandler(event: DragEvent){
+        const prjId = event.dataTransfer!.getData('text/plain');
+        projectState.moveProject(prjId,this.type == 'finished' ? projectStatus.Finished : projectStatus.Active);
+    };
+
+    @autobind
+    dragLeaveHandler(_: DragEvent){
+        const listEl = this.element.querySelector('ul')!;
+        listEl.classList.remove('droppable');
+    };
+
     configure(){
+        this.element.addEventListener('dragover', this.dragOverHandler);
+        this.element.addEventListener('dragleave', this.dragLeaveHandler);
+        this.element.addEventListener('drop', this.dropHandler);
         projectState.addListener((projects: Project[])=> {
             const releventProjects = projects.filter(prj=> {
                 if (this.type === 'active'){
@@ -161,7 +212,7 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement>{
 
 // Project Item Class: 
 
-class ProjectItem extends Component<HTMLUListElement,HTMLLIElement> {
+class ProjectItem extends Component<HTMLUListElement,HTMLLIElement> implements Dragable {
     private project: Project; 
 
     get persons(){
@@ -179,9 +230,19 @@ class ProjectItem extends Component<HTMLUListElement,HTMLLIElement> {
        this.configure();
        this.renderContent();
     }
+    @autobind
+    dragStartHandler(event: DragEvent){
+        event.dataTransfer!.setData('text/plain', this.project.id);
+        event.dataTransfer!.effectAllowed = 'move';
+    }
+    @autobind
+    dragEndHandler(_: DragEvent){
+        console.log('DragEnd')
+    }
 
     configure(){
-
+        this.element.addEventListener("dragstart", this.dragStartHandler);
+        this.element.addEventListener("dragend", this.dragEndHandler);
     }
     
     renderContent(){
