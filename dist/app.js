@@ -5,18 +5,29 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var projectStatus;
+(function (projectStatus) {
+    projectStatus[projectStatus["Active"] = 0] = "Active";
+    projectStatus[projectStatus["Finished"] = 1] = "Finished";
+})(projectStatus || (projectStatus = {}));
+;
+var Project = (function () {
+    function Project(id, title, description, people, status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.people = people;
+        this.status = status;
+    }
+    return Project;
+}());
 var ProjectState = (function () {
     function ProjectState() {
         this.listeners = [];
         this.projects = [];
     }
     ProjectState.prototype.addProject = function (title, description, numOfPeople) {
-        var newProject = {
-            id: Math.random().toString(),
-            title: title,
-            description: description,
-            people: numOfPeople,
-        };
+        var newProject = new Project(Math.random().toString(), title, description, numOfPeople, projectStatus.Active);
         this.projects.push(newProject);
         for (var _i = 0, _a = this.listeners; _i < _a.length; _i++) {
             var listenerFn = _a[_i];
