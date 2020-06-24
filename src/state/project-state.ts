@@ -1,4 +1,4 @@
-import {Project, projectStatus} from '../models/project.js';
+import {Project, projectStatus} from '../models/project';
 
 type Listener<T> = (items:T[])=> void;
 
